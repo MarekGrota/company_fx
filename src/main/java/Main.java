@@ -5,17 +5,28 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+    @Override
+    public void init(){
+        System.out.println("METODA INIT");
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("/view/sample.fxml"));
-        primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        System.out.println("METODA START");
+        // załądowanie widoku z pliku fxml do obiektu parent
+        Parent parent = FXMLLoader.load(getClass().getResource("/view/loginView.fxml"));
+        primaryStage.setTitle("Logowanie");
+        primaryStage.setResizable(false);
+        primaryStage.setScene(new Scene(parent));
         primaryStage.show();
     }
-
+    // po zamknięciu aplikacji
+    @Override
+    public void stop(){
+        System.out.println("METODA STOP");
+    }
 
     public static void main(String[] args) {
-        launch(args);
+        launch(args);       // wywołanie metody statycznej uruchamiającej cykl życia aplikacji
     }
 }
