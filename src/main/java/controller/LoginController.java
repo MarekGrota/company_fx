@@ -12,8 +12,8 @@ import utility.UserData;
 
 public class LoginController {
 
-    @FXML // fx:id="pfLogin"
-    private TextField pfLogin; // Value injected by FXMLLoader
+    @FXML // fx:id="tfLogin"
+    private TextField tfLogin; // Value injected by FXMLLoader
 
     @FXML // fx:id="pfPassword"
     private PasswordField pfPassword; // Value injected by FXMLLoader
@@ -22,20 +22,22 @@ public class LoginController {
     void loginAction(ActionEvent event) {
         boolean isLogged = UserData.users.stream()
                 .anyMatch(user ->
-                        user.getEmail().equals(pfLogin.getText()) &&
+                        user.getEmail().equals(tfLogin.getText()) &&
                         user.getPassword().equals(pfPassword.getText()));
         if(isLogged){
             System.out.println("Zalogowano");
-            pfLogin.setStyle(null);
+            tfLogin.setStyle(null);
             pfPassword.setStyle(null);
-            pfLogin.setStyle("-fx-border-color: green; -fx-border-width: 3px");
-            pfPassword.setStyle("-fx-border-color: green; -fx-border-width: 3px");
+            tfLogin.clear();
+            pfPassword.clear();
+            tfLogin.setStyle("-fx-border-color: green; -fx-border-width: 2px");
+            pfPassword.setStyle("-fx-border-color: green; -fx-border-width: 2px");
         } else {
             System.out.println("niezalogowano");
-            pfLogin.clear();
+            tfLogin.clear();
             pfPassword.clear();
-            pfLogin.setStyle("-fx-border-color: red; -fx-border-width: 3px");
-            pfPassword.setStyle("-fx-border-color: red; -fx-border-width: 3px");
+            tfLogin.setStyle("-fx-border-color: red; -fx-border-width: 2px");
+            pfPassword.setStyle("-fx-border-color: red; -fx-border-width: 2px");
         }
     }
 

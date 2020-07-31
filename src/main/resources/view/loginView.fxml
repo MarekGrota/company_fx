@@ -11,13 +11,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="400.0" spacing="15.0" style="-fx-background-color: #f7f7f7;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LoginController">
    <children>
       <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="PANEL LOGOWANIA">
          <font>
             <Font name="System Bold" size="24.0" />
          </font>
+         <VBox.margin>
+            <Insets bottom="20.0" />
+         </VBox.margin>
       </Label>
       <Separator prefWidth="200.0" />
       <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
@@ -28,7 +30,7 @@
             <Insets />
          </VBox.margin>
       </ImageView>
-      <TextField fx:id="pfLogin" promptText="Wprowadź login">
+      <TextField fx:id="tfLogin" promptText="Wprowadź login">
          <font>
             <Font size="14.0" />
          </font>
