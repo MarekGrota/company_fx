@@ -5,6 +5,8 @@
 package controller;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,46 +20,53 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import model.Category;
+import model.Product;
 
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 public class CompanyController {
 
     @FXML // fx:id="tblProduct"
-    private TableView<?> tblProduct; // Value injected by FXMLLoader
+    private TableView<Product> tblProduct;
 
     @FXML // fx:id="tcName"
-    private TableColumn<?, ?> tcName; // Value injected by FXMLLoader
+    private TableColumn<Product, String> tcName;
 
     @FXML // fx:id="tcCategory"
-    private TableColumn<?, ?> tcCategory; // Value injected by FXMLLoader
+    private TableColumn<Product, String> tcCategory;
 
     @FXML // fx:id="tcPrice"
-    private TableColumn<?, ?> tcPrice; // Value injected by FXMLLoader
+    private TableColumn<Product, Double> tcPrice;
 
     @FXML // fx:id="tcQuantity"
-    private TableColumn<?, ?> tcQuantity; // Value injected by FXMLLoader
+    private TableColumn<Product, Integer> tcQuantity; // Value injected by FXMLLoader
 
     @FXML // fx:id="tfSearch"
     private TextField tfSearch; // Value injected by FXMLLoader
 
-    @FXML // fx:id="cbLess5"
-    private CheckBox cbLess5; // Value injected by FXMLLoader
+    @FXML
+    private CheckBox cbLess5;
 
-    @FXML // fx:id="cbMedium"
-    private CheckBox cbMedium; // Value injected by FXMLLoader
+    @FXML
+    private CheckBox cbMedium;
 
-    @FXML // fx:id="cbMore10"
-    private CheckBox cbMore10; // Value injected by FXMLLoader
+    @FXML
+    private CheckBox cbMore10;
 
-    @FXML // fx:id="comboCategory"
-    private ComboBox<?> comboCategory; // Value injected by FXMLLoader
+    @FXML
+    private ComboBox<?> comboCategory;
 
-    @FXML // fx:id="btnUpdate"
-    private Button btnUpdate; // Value injected by FXMLLoader
+    @FXML
+    private Button btnUpdate;
 
-    @FXML // fx:id="btnDelete"
-    private Button btnDelete; // Value injected by FXMLLoader
+    @FXML
+    private Button btnDelete;
 
     @FXML
     void addAction(ActionEvent event) {
@@ -67,6 +76,24 @@ public class CompanyController {
     @FXML
     void closeAction(ActionEvent event) {
         Platform.exit();
+    }
+    private ObservableList<Product> products = FXCollections.observableArrayList();
+
+
+    private void getProductsFromFile() throws FileNotFoundException {
+        String path = Paths.get("").toAbsolutePath().toString() + "\\src\\main\\java\\utility\\products.csv";
+        Scanner scanner = new Scanner(new File(path));
+        scanner.nextLine();         // pominięcie nagłówka w pliku .csv
+        while (scanner.hasNextLine()) {
+            String line [] = scanner.nextLine().split(";");
+            products.add(new Product(Integer.valueOf(line[0]),line[1],
+                    Category.valueOf(line[2]),
+                            Double.valueOf(line[3]), Integer.valueOf(line[4])));
+        }
+    }
+
+    private void setProductsIntoTable() {
+
     }
 
     @FXML
