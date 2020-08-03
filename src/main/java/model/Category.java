@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum Category {
-    KAROSERIA("karoseria"),
-    ZAWIESZENIE("zawieszenie"),
-    SILNIK("silnik");
+    karoseria("karoseria"),
+    zawieszenie("zawieszenie"),
+    silnik("silnik");
 
     private String categoryName;
 

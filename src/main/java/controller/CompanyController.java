@@ -54,6 +54,7 @@ public class CompanyController {
     private Button btnUpdate;
     @FXML
     private Button btnDelete;
+
     @FXML
     void logoutAction(ActionEvent event) throws IOException {
         Stage primaryStage = new Stage();
@@ -66,6 +67,7 @@ public class CompanyController {
         Stage companyStage = (Stage) btnDelete.getScene().getWindow();
         companyStage.close();
     }
+
     @FXML
     void closeAction(ActionEvent event) {
 
@@ -74,24 +76,26 @@ public class CompanyController {
 
     private ObservableList<Product> products = FXCollections.observableArrayList();
 
-    private String path = Paths.get("").toAbsolutePath().toString()+
+    private String path = Paths.get("").toAbsolutePath().toString() +
             "\\src\\main\\java\\utility\\products.csv";
+
     private void getProductsFromFile() throws FileNotFoundException {
 
         Scanner scanner = new Scanner(new File(path));
         scanner.nextLine(); // pominięcie nagłówka w pliku .csv
-        while (scanner.hasNextLine()){
-            String line [] = scanner.nextLine().split(";");
+        while (scanner.hasNextLine()) {
+            String line[] = scanner.nextLine().split(";");
             products.add(new Product(
-                    Integer.valueOf(line[0]),line[1],
+                    Integer.valueOf(line[0]), line[1],
                     Arrays.stream(Category.values())                                        // Category []
                             .filter(category -> category.getCategoryName().equals(line[2])) // filtrowanie po nazwie kategorii
                             .findAny()                                                      // Optional<Category>
                             .get(),                                                          // Category
-                    Double.valueOf(line[3]),Integer.valueOf(line[4])));
+                    Double.valueOf(line[3]), Integer.valueOf(line[4])));
         }
     }
-    private void setProductsIntoTable(){
+
+    private void setProductsIntoTable() {
         // konfiguracja wartości wporwadzanych do tabeli z pól klasy modelu Product
         tcName.setCellValueFactory(new PropertyValueFactory<>("name"));
         tcCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
@@ -105,10 +109,10 @@ public class CompanyController {
         try {
 
             PrintWriter pw = new PrintWriter(new File(path));
-
+            pw.print("id;nazwa;kategoria;cena;ilość");
             for (Product product : products) {
-                pw.println(String.format(
-                        "%d;%s;%s;%.2f;%d",
+                pw.print(String.format(
+                        "\n%d;%s;%s;%.0f;%d",
                         product.getId(), product.getName(), product.getCategory(), product.getPrice(), product.getQuantity()
                 ));
             }
@@ -117,6 +121,7 @@ public class CompanyController {
             e.printStackTrace();
         }
     }
+
     public void initialize() throws FileNotFoundException {
         getProductsFromFile();
         setProductsIntoTable();
@@ -154,9 +159,9 @@ public class CompanyController {
         dialog.getDialogPane().getButtonTypes().addAll(btnOk);
 
         Optional<Product> productOpt = dialog.showAndWait();
-        if(productOpt.isPresent()) {
-            if(!tfProductPrice.getText().matches("[0-9]+\\.{0,1}[0-9]{0,2}") ||
-                    !tfProductQuantity.getText().matches("[0-9]+")){
+        if (productOpt.isPresent()) {
+            if (!tfProductPrice.getText().matches("[0-9]+\\.{0,1}[0-9]{0,2}") ||
+                    !tfProductQuantity.getText().matches("[0-9]+")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Błąd danych");
                 alert.setHeaderText("Błąd danych. Produkt nie został dodany!");
@@ -169,12 +174,20 @@ public class CompanyController {
             }
         }
     }
+
     @FXML
-    void deleteAction(ActionEvent event) { }
+    void deleteAction(ActionEvent event) {
+    }
+
     @FXML
-    void filterAction(ActionEvent event) { }
+    void filterAction(ActionEvent event) {
+    }
+
     @FXML
-    void selectAction(MouseEvent event) { }
+    void selectAction(MouseEvent event) {
+    }
+
     @FXML
-    void updateAction(ActionEvent event) { }
+    void updateAction(ActionEvent event) {
+    }
 }
