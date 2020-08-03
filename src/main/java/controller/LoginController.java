@@ -1,7 +1,3 @@
-/**
- * Sample Skeleton for 'loginView.fxml' Controller Class
- */
-
 package controller;
 
 import javafx.application.Platform;
@@ -21,34 +17,29 @@ import utility.UserData;
 import java.io.IOException;
 
 public class LoginController {
-
-    @FXML // fx:id="tfLogin"
-    private TextField tfLogin; // Value injected by FXMLLoader
-
-    @FXML // fx:id="pfPassword"
-    private PasswordField pfPassword; // Value injected by FXMLLoader
-
+    @FXML
+    private TextField tfLogin;
+    @FXML
+    private PasswordField pfPassword;
+    // metoda dostarczająca logikę do logowania użytkownika
     private void login() throws IOException {
         boolean isLogged = UserData.users.stream()
                 .anyMatch(user ->
                         user.getEmail().equals(tfLogin.getText()) &&
                                 user.getPassword().equals(pfPassword.getText()));
-        if (isLogged) {
-            System.out.println("Zalogowano");
+        if(isLogged){
+            System.out.println("zalogowano");
             tfLogin.setStyle(null);
             pfPassword.setStyle(null);
-
             // wywołanie nowego okna aplikacji
             Stage primaryStage = new Stage();
             Parent parent = FXMLLoader.load(getClass().getResource("/view/companyView.fxml"));
             primaryStage.setTitle("Aplikacja magazynowa");  // tytuł okna
-            primaryStage.setResizable(false);               // brak skalowania
-            primaryStage.initStyle(StageStyle.UNDECORATED); // brak przycisków w tytule okna
+//            primaryStage.setResizable(false);               // brak skalowania
+            primaryStage.initStyle(StageStyle.UNDECORATED); // brak przyciksków w tytule okna
             primaryStage.setScene(new Scene(parent));
             primaryStage.show();
-            pfPassword.clear();
-
-            // zamknięcie okna logowania na obiekcie typu String
+            // zamknięcie okna logowania na obiekcie typu Stage
             Stage loginStage = (Stage) tfLogin.getScene().getWindow();
             loginStage.close();
         } else {
@@ -59,19 +50,16 @@ public class LoginController {
             pfPassword.setStyle("-fx-border-color: red; -fx-border-width: 2px");
         }
     }
-
-    @FXML
-        // klikniecie na button (button)
+    @FXML   // kliknięcie na button (button)
     void loginAction(ActionEvent event) throws IOException {
         login();
     }
-
-    @FXML
-        //wciśnięcie Enter w dowolnym miejscu na oknie aplikacji (vbox)
+    @FXML   // wciśnięce Enter w dowolnym miejscu na oknie aplikacji (vbox)
     void keyLoginAction(KeyEvent event) throws IOException {
-        if (event.getCode() == KeyCode.ENTER)
+        if(event.getCode() == KeyCode.ENTER) {
             login();
-        if (event.getCode() == KeyCode.ESCAPE)
-            Platform.exit(); // zamknięcie okna aplikacji (wywołanie metody close())
+        } else if(event.getCode() == KeyCode.ESCAPE){
+            Platform.exit();    // zamknięcie okna aplikacji wywołanie metody close()
+        }
     }
 }
