@@ -1,3 +1,5 @@
-id;nazwa;kategoria;cena;ilość
-1;2.0 TDI (150KM);silnik;15000;2
-2;reflektor BMW X3 (lewy);karoseria;6000;10
+id;nazwa;kategoria;cena;lość
+1;2.0 TDI (150KM);silnik;15000,00;2
+2;reflektor BMW X3 (lewy);karoseria;6000,00;10
+3;ąęść;karoseria;12,00;1
+4;ąęśćł;zawieszenie;123,78;1

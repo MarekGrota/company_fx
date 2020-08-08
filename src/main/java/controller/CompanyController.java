@@ -19,19 +19,19 @@ import model.Category;
 import model.Product;
 import utility.UserData;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class CompanyController {
     @FXML
     private TableView<Product> tblProducts;
+    @FXML
+    private TableColumn<Product, Integer> tcId;
     @FXML
     private TableColumn<Product, String> tcName;
     @FXML
@@ -49,7 +49,7 @@ public class CompanyController {
     @FXML
     private CheckBox cbMore10;
     @FXML
-    private ComboBox<?> comboCategory;
+    private ComboBox<Category> comboCategory;
     @FXML
     private Button btnUpdate;
     @FXML
@@ -80,23 +80,23 @@ public class CompanyController {
             "\\src\\main\\java\\utility\\products.csv";
 
     private void getProductsFromFile() throws FileNotFoundException {
-
         Scanner scanner = new Scanner(new File(path));
         scanner.nextLine(); // pominięcie nagłówka w pliku .csv
-        while (scanner.hasNextLine()) {
-            String line[] = scanner.nextLine().split(";");
+        while (scanner.hasNextLine()){
+            String line [] = scanner.nextLine().split(";");
             products.add(new Product(
-                    Integer.valueOf(line[0]), line[1],
+                    Integer.valueOf(line[0]),line[1],
                     Arrays.stream(Category.values())                                        // Category []
                             .filter(category -> category.getCategoryName().equals(line[2])) // filtrowanie po nazwie kategorii
                             .findAny()                                                      // Optional<Category>
                             .get(),                                                          // Category
-                    Double.valueOf(line[3]), Integer.valueOf(line[4])));
+                    Double.valueOf(line[3].replace(",",".")),Integer.valueOf(line[4])));
         }
     }
 
     private void setProductsIntoTable() {
         // konfiguracja wartości wporwadzanych do tabeli z pól klasy modelu Product
+        tcId.setCellValueFactory(new PropertyValueFactory<>("id"));
         tcName.setCellValueFactory(new PropertyValueFactory<>("name"));
         tcCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
         tcPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
@@ -105,30 +105,33 @@ public class CompanyController {
         tblProducts.setItems(products);
     }
 
-    public void saveProductsToFile() {
-        try {
-
-            PrintWriter pw = new PrintWriter(new File(path));
-            pw.print("id;nazwa;kategoria;cena;ilość");
-            for (Product product : products) {
-                pw.print(String.format(
-                        "\n%d;%s;%s;%.0f;%d",
-                        product.getId(), product.getName(), product.getCategory(), product.getPrice(), product.getQuantity()
-                ));
-            }
-            pw.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public void saveProductsToFile() throws IOException {
+        PrintWriter pw = new PrintWriter(new File(path));
+        pw.println("id;nazwa;kategoria;cena;lość");
+        for (Product product : products) {
+            pw.println(
+                    String.format(
+                            Locale.US,
+                            "%d;%s;%s;%s;%d",
+                            product.getId(),
+                            product.getName(),
+                            product.getCategory().getCategoryName(),
+                            String.format("%.2f",product.getPrice()).replace(".",","),
+                            product.getQuantity()
+                    ));
         }
+        pw.close();
     }
 
     public void initialize() throws FileNotFoundException {
         getProductsFromFile();
         setProductsIntoTable();
+        // wprowadzenie kategorii
+        comboCategory.setItems(FXCollections.observableArrayList(Category.values()));
     }
 
     @FXML
-    void addAction(ActionEvent event) {
+    void addAction(ActionEvent event) throws IOException {
         Dialog<Product> dialog = new Dialog<>();
         dialog.setTitle("Dodaj produkt");
         dialog.setHeaderText("Dodaj produkt");
@@ -176,16 +179,39 @@ public class CompanyController {
     }
 
     @FXML
-    void deleteAction(ActionEvent event) {
-    }
-
-    @FXML
-    void filterAction(ActionEvent event) {
+    void deleteAction(ActionEvent event) throws IOException {
+        Product product = tblProducts.getSelectionModel().getSelectedItem();
+        if (product != null) {
+            products.remove(product);
+            saveProductsToFile();
+            setProductsIntoTable();
+            btnDelete.setDisable(true);
+            btnUpdate.setDisable(true);
+        }
     }
 
     @FXML
     void selectAction(MouseEvent event) {
+        Product product = tblProducts.getSelectionModel().getSelectedItem();
+        if (product != null) {
+            btnDelete.setDisable(false);
+            btnUpdate.setDisable(false);
+        } else {
+            btnDelete.setDisable(true);
+            btnUpdate.setDisable(true);
+        }
     }
+
+    @FXML
+    void filterAction(ActionEvent event) {
+        ObservableList<Product> filteredProducts = FXCollections.observableArrayList(
+                products.stream().
+                        filter(product -> product.getName().toLowerCase().contains(tfSearch.getText().toLowerCase()))
+                .collect(Collectors.toList()));
+        tblProducts.setItems(filteredProducts);
+    }
+
+
 
     @FXML
     void updateAction(ActionEvent event) {
