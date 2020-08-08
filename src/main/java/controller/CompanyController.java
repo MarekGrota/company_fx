@@ -183,14 +183,14 @@ public class CompanyController {
         Product product = tblProducts.getSelectionModel().getSelectedItem();
         if (product != null) {
             products.remove(product);
-            saveProductsToFile();
-            setProductsIntoTable();
+            saveProductsToFile();   //aktualizacja pliku
+            setProductsIntoTable();  //aktualizacja tabeli
             btnDelete.setDisable(true);
             btnUpdate.setDisable(true);
         }
     }
 
-    @FXML
+    @FXML   // akcja zaznaczenia rekordu w tabelce
     void selectAction(MouseEvent event) {
         Product product = tblProducts.getSelectionModel().getSelectedItem();
         if (product != null) {
@@ -205,13 +205,22 @@ public class CompanyController {
     @FXML
     void filterAction(ActionEvent event) {
         ObservableList<Product> filteredProducts = FXCollections.observableArrayList(
-                products.stream().
-                        filter(product -> product.getName().toLowerCase().contains(tfSearch.getText().toLowerCase()))
-                .collect(Collectors.toList()));
+                products.stream()
+                        .filter(product -> product.getName().toLowerCase().contains(tfSearch.getText().toLowerCase()))
+                        .collect(Collectors.toList()));
+        if(comboCategory.getValue() != null) {
+            filteredProducts = FXCollections.observableArrayList(filteredProducts.stream()
+                    .filter(product -> product.getCategory().equals(comboCategory.getValue()))
+                    .collect(Collectors.toList()));
+        }
         tblProducts.setItems(filteredProducts);
+        // czyszczenie kategorii
+        tfSearch.clear();
+        comboCategory.setValue(null);
+        cbLess5.setSelected(true);
+        cbMedium.setSelected(true);
+        cbMore10.setSelected(true);
     }
-
-
 
     @FXML
     void updateAction(ActionEvent event) {
