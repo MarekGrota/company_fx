@@ -21,6 +21,7 @@ import utility.UserData;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
@@ -96,10 +97,24 @@ public class CompanyController {
 
     private void setProductsIntoTable() {
         // konfiguracja wartości wporwadzanych do tabeli z pól klasy modelu Product
-        tcId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        tcId.setCellValueFactory(new PropertyValueFactory<>("Id"));
         tcName.setCellValueFactory(new PropertyValueFactory<>("name"));
         tcCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
         tcPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
+        // format walutowy
+        Locale locale = new Locale("pl", "PL");
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        tcPrice.setCellFactory(tc -> new TableCell<Product, Double>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormat.format(price));
+                }
+            }
+        });
         tcQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         // przekazanie wartości do tabeli z ObservableList
         tblProducts.setItems(products);
@@ -123,43 +138,44 @@ public class CompanyController {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField tfProductName = new TextField();
-        tfProductName.setPromptText("nazwa");
-        ComboBox<Category> comboProductCategory = new ComboBox<>();
-        comboProductCategory.setItems(FXCollections.observableArrayList(Category.values()));
-        comboProductCategory.setPromptText("kategoria");
-        TextField tfProductPrice = new TextField();
-        tfProductPrice.setPromptText("cena");
-        TextField tfProductQuantity = new TextField();
-        tfProductQuantity.setPromptText("ilość");
+        TextField tf_productName = new TextField();
+        tf_productName.setPromptText("nazwa");
+        ComboBox<Category> combo_productCategory = new ComboBox<>();
+        combo_productCategory.setItems(FXCollections.observableArrayList(Category.values()));
+        combo_productCategory.setPromptText("kategoria");
+        TextField tf_productPrice = new TextField();
+        tf_productPrice.setPromptText("cena");
+        TextField tf_productQuantity = new TextField();
+        tf_productQuantity.setPromptText("ilość");
 
-        grid.add(tfProductName, 0, 0);
-        grid.add(comboProductCategory, 0, 1);
-        grid.add(tfProductPrice, 0, 2);
-        grid.add(tfProductQuantity, 0, 3);
+        grid.add(tf_productName, 0, 0);
+        grid.add(combo_productCategory, 0, 1);
+        grid.add(tf_productPrice, 0, 2);
+        grid.add(tf_productQuantity, 0, 3);
 
         dialog.getDialogPane().setContent(grid);
         // przyciski
-        ButtonType btnOk = new ButtonType("Dodaj", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(btnOk);
+        ButtonType btn_ok = new ButtonType("Dodaj", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btn_ok);
 
         Optional<Product> productOpt = dialog.showAndWait();
         if (productOpt.isPresent()) {
-            if (!tfProductPrice.getText().matches("[0-9]+\\.{0,1}[0-9]{0,2}") ||
-                    !tfProductQuantity.getText().matches("[0-9]+")) {
+            if (!tf_productPrice.getText().matches("[0-9]+\\.{0,1}[0-9]{0,2}") ||
+                    !tf_productQuantity.getText().matches("[0-9]+")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Błąd danych");
                 alert.setHeaderText("Błąd danych. Produkt nie został dodany!");
                 alert.showAndWait();
             } else {
                 products.add(new Product(products.stream().mapToInt(p -> p.getId()).max().getAsInt() + 1,
-                        tfProductName.getText(), comboProductCategory.getValue(),
-                        Double.valueOf(tfProductPrice.getText()), Integer.valueOf(tfProductQuantity.getText())));
+                        tf_productName.getText(), combo_productCategory.getValue(),
+                        Double.valueOf(tf_productPrice.getText()), Integer.valueOf(tf_productQuantity.getText())));
                 saveProductsToFile();
                 setProductsIntoTable();
             }
         }
     }
+
 
     public void saveProductsToFile() throws IOException {
         PrintWriter pw = new PrintWriter(new File(path));
@@ -206,45 +222,41 @@ public class CompanyController {
 
     @FXML
     void filterAction(ActionEvent event) {
-        // filtrowanie po nazwie
         ObservableList<Product> filteredProducts = FXCollections.observableArrayList(
                 products.stream()
                         .filter(product -> product.getName().toLowerCase().contains(tfSearch.getText().toLowerCase()))
                         .collect(Collectors.toList()));
-        if(comboCategory.getValue() != null) {
-            // filtrowanie po kategorii
+        if (comboCategory.getValue() != null){
             filteredProducts = FXCollections.observableArrayList(filteredProducts.stream()
                     .filter(product -> product.getCategory().equals(comboCategory.getValue()))
                     .collect(Collectors.toList()));
         }
         // filtrowanie po ilości
         ObservableList<Product> productsToFilter = FXCollections.observableArrayList();
-        if(cbLess5.isSelected()){
+        if (cbLess5.isSelected()){
             productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
                     .filter(product -> product.getQuantity() < 5)
                     .collect(Collectors.toList())));
         }
-        if(cbMedium.isSelected()){
+        if (cbMedium.isSelected()){
             productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
                     .filter(product -> product.getQuantity() >= 5 && product.getQuantity() <= 10)
                     .collect(Collectors.toList())));
         }
-        if(cbMore10.isSelected()){
+        if (cbMore10.isSelected()){
             productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
                     .filter(product -> product.getQuantity() > 10)
                     .collect(Collectors.toList())));
         }
         ObservableList<Product> finalFilter = FXCollections.observableArrayList();
-        for (Product p1 : productsToFilter) {
-            for (Product p2 : filteredProducts) {
-                if(p1.equals(p2)){
+        for (Product p1: productsToFilter) {
+            for (Product p2: filteredProducts) {
+                if (p1.equals(p2)){
                     finalFilter.add(p1);
                 }
             }
         }
         tblProducts.setItems(finalFilter);
-
-        // czyszczenie pól
         tfSearch.clear();
         comboCategory.setValue(null);
         cbLess5.setSelected(true);
@@ -253,6 +265,57 @@ public class CompanyController {
     }
 
     @FXML
-    void updateAction(ActionEvent event) {
+    void updateAction(ActionEvent event) throws IOException {
+        // zaznaczone w tabelce
+        Product product = tblProducts.getSelectionModel().getSelectedItem(); // odwołanie do obiektu zaznaczonego w tabeli
+
+        Dialog<Product> dialog = new Dialog<>();
+        dialog.setTitle("Edytuj produkt");
+        dialog.setHeaderText("Edytuj produkt");
+        // ustawienie kontrolek
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField tf_productName = new TextField();
+        tf_productName.setText(product.getName());
+        ComboBox<Category> combo_productCategory = new ComboBox<>();
+        combo_productCategory.setItems(FXCollections.observableArrayList(Category.values()));
+        combo_productCategory.setValue(product.getCategory());
+        TextField tf_productPrice = new TextField();
+        tf_productPrice.setText(String.valueOf(product.getPrice()));
+        TextField tf_productQuantity = new TextField();
+        tf_productQuantity.setText(String.valueOf(product.getQuantity()));
+
+        grid.add(tf_productName, 0, 0);
+        grid.add(combo_productCategory, 0, 1);
+        grid.add(tf_productPrice, 0, 2);
+        grid.add(tf_productQuantity, 0, 3);
+
+        dialog.getDialogPane().setContent(grid);
+        // przyciski
+        ButtonType btn_ok = new ButtonType("Edytuj", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(btn_ok);
+
+        Optional<Product> productOpt = dialog.showAndWait();
+        if (productOpt.isPresent()) {
+            if (!tf_productPrice.getText().matches("[0-9]+\\.{0,1}[0-9]{0,2}") ||
+                    !tf_productQuantity.getText().matches("[0-9]+")) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Błąd danych");
+                alert.setHeaderText("Błąd danych. Produkt nie został dodany!");
+                alert.showAndWait();
+            } else {
+                product.setName(tf_productName.getText());
+                product.setCategory(combo_productCategory.getValue());
+                product.setPrice(Double.valueOf(tf_productPrice.getText()));
+                product.setQuantity(Integer.valueOf(tf_productQuantity.getText()));
+                saveProductsToFile();
+                products.clear();
+                getProductsFromFile();
+                setProductsIntoTable();
+            }
+        }
     }
 }
