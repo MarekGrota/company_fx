@@ -28,6 +28,10 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class CompanyController {
+
+    private String path = Paths.get("").toAbsolutePath().toString() +
+            "\\src\\main\\java\\utility\\products.csv";
+
     @FXML
     private TableView<Product> tblProducts;
     @FXML
@@ -70,27 +74,23 @@ public class CompanyController {
 
     @FXML
     void closeAction(ActionEvent event) {
-
         Platform.exit();
     }
 
     private ObservableList<Product> products = FXCollections.observableArrayList();
 
-    private String path = Paths.get("").toAbsolutePath().toString() +
-            "\\src\\main\\java\\utility\\products.csv";
-
     private void getProductsFromFile() throws FileNotFoundException {
         Scanner scanner = new Scanner(new File(path));
         scanner.nextLine(); // pominięcie nagłówka w pliku .csv
-        while (scanner.hasNextLine()){
-            String line [] = scanner.nextLine().split(";");
+        while (scanner.hasNextLine()) {
+            String line[] = scanner.nextLine().split(";");
             products.add(new Product(
-                    Integer.valueOf(line[0]),line[1],
+                    Integer.valueOf(line[0]), line[1],
                     Arrays.stream(Category.values())                                        // Category []
                             .filter(category -> category.getCategoryName().equals(line[2])) // filtrowanie po nazwie kategorii
                             .findAny()                                                      // Optional<Category>
                             .get(),                                                          // Category
-                    Double.valueOf(line[3].replace(",",".")),Integer.valueOf(line[4])));
+                    Double.valueOf(line[3].replace(",", ".")), Integer.valueOf(line[4])));
         }
     }
 
@@ -105,28 +105,10 @@ public class CompanyController {
         tblProducts.setItems(products);
     }
 
-    public void saveProductsToFile() throws IOException {
-        PrintWriter pw = new PrintWriter(new File(path));
-        pw.println("id;nazwa;kategoria;cena;lość");
-        for (Product product : products) {
-            pw.println(
-                    String.format(
-                            Locale.US,
-                            "%d;%s;%s;%s;%d",
-                            product.getId(),
-                            product.getName(),
-                            product.getCategory().getCategoryName(),
-                            String.format("%.2f",product.getPrice()).replace(".",","),
-                            product.getQuantity()
-                    ));
-        }
-        pw.close();
-    }
-
     public void initialize() throws FileNotFoundException {
         getProductsFromFile();
         setProductsIntoTable();
-        // wprowadzenie kategorii
+        // wprowadzenie kategorii do combobox
         comboCategory.setItems(FXCollections.observableArrayList(Category.values()));
     }
 
@@ -174,8 +156,27 @@ public class CompanyController {
                         tfProductName.getText(), comboProductCategory.getValue(),
                         Double.valueOf(tfProductPrice.getText()), Integer.valueOf(tfProductQuantity.getText())));
                 saveProductsToFile();
+                setProductsIntoTable();
             }
         }
+    }
+
+    public void saveProductsToFile() throws IOException {
+        PrintWriter pw = new PrintWriter(new File(path));
+        pw.println("id;nazwa;kategoria;cena;lość");
+        for (Product product : products) {
+            pw.println(
+                    String.format(
+                            Locale.US,
+                            "%d;%s;%s;%s;%d",
+                            product.getId(),
+                            product.getName(),
+                            product.getCategory().getCategoryName(),
+                            String.format("%.2f", product.getPrice()).replace(".", ","),
+                            product.getQuantity()
+                    ));
+        }
+        pw.close();
     }
 
     @FXML
@@ -190,7 +191,8 @@ public class CompanyController {
         }
     }
 
-    @FXML   // akcja zaznaczenia rekordu w tabelce
+    @FXML
+        // akcja zaznaczenia rekordu w tabelce
     void selectAction(MouseEvent event) {
         Product product = tblProducts.getSelectionModel().getSelectedItem();
         if (product != null) {
@@ -204,17 +206,45 @@ public class CompanyController {
 
     @FXML
     void filterAction(ActionEvent event) {
+        // filtrowanie po nazwie
         ObservableList<Product> filteredProducts = FXCollections.observableArrayList(
                 products.stream()
                         .filter(product -> product.getName().toLowerCase().contains(tfSearch.getText().toLowerCase()))
                         .collect(Collectors.toList()));
         if(comboCategory.getValue() != null) {
+            // filtrowanie po kategorii
             filteredProducts = FXCollections.observableArrayList(filteredProducts.stream()
                     .filter(product -> product.getCategory().equals(comboCategory.getValue()))
                     .collect(Collectors.toList()));
         }
-        tblProducts.setItems(filteredProducts);
-        // czyszczenie kategorii
+        // filtrowanie po ilości
+        ObservableList<Product> productsToFilter = FXCollections.observableArrayList();
+        if(cbLess5.isSelected()){
+            productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
+                    .filter(product -> product.getQuantity() < 5)
+                    .collect(Collectors.toList())));
+        }
+        if(cbMedium.isSelected()){
+            productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
+                    .filter(product -> product.getQuantity() >= 5 && product.getQuantity() <= 10)
+                    .collect(Collectors.toList())));
+        }
+        if(cbMore10.isSelected()){
+            productsToFilter.addAll(FXCollections.observableArrayList(filteredProducts.stream()
+                    .filter(product -> product.getQuantity() > 10)
+                    .collect(Collectors.toList())));
+        }
+        ObservableList<Product> finalFilter = FXCollections.observableArrayList();
+        for (Product p1 : productsToFilter) {
+            for (Product p2 : filteredProducts) {
+                if(p1.equals(p2)){
+                    finalFilter.add(p1);
+                }
+            }
+        }
+        tblProducts.setItems(finalFilter);
+
+        // czyszczenie pól
         tfSearch.clear();
         comboCategory.setValue(null);
         cbLess5.setSelected(true);
